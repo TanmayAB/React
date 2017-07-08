@@ -16,9 +16,39 @@ var PLAYERS = [
   },
 ];
 
+function Stats(props){
+  
+  var totalPlayers = props.players.length;
+  var totalScore = props.players.reduce(function(total,player) {
+    return total + player.score;
+  }, 0);
+
+  return(
+  <table className="stats">
+    <tbody>
+      <tr>
+        <td>Players : </td>
+        <td>{totalPlayers}</td>
+      </tr>
+    </tbody>
+    <tbody>
+      <tr>
+        <td>Total Score : </td>
+        <td>{totalScore}</td>
+      </tr>
+    </tbody>
+  </table>
+  );
+}
+
+Stats.PropTypes = {
+  players : React.PropTypes.array.isRequired,
+};
+
 function Header(props) {
   return (
     <div className="header">
+    <Stats players={props.players}/>
       <h1>{props.title}</h1>
     </div>
   );
@@ -26,6 +56,7 @@ function Header(props) {
 
 Header.propTypes = {
   title: React.PropTypes.string.isRequired,
+  players: React.PropTypes.array.isRequired,
 };
 
 function Counter(props){
@@ -39,7 +70,7 @@ function Counter(props){
 }
   
 Counter.propTypes = {
-  initialScore: React.PropTypes.number.isRequired,
+  score: React.PropTypes.number.isRequired,
   onChange: React.PropTypes.func.isRequired,
 };
 
@@ -51,7 +82,7 @@ function Player(props) {
         {props.name}
       </div>
       <div className="player-score">
-        <Counter initialScore={props.score} onChange={props.onScoreChange}/>
+        <Counter score={props.score} onChange={props.onScoreChange}/>
       </div>
     </div>
   );
@@ -88,12 +119,14 @@ var Application = React.createClass({
   
   onScoreChange : function(index,delta){
     console.log("Called onScoreChanged",index,delta);
+    this.state.players[index].score += delta;
+    this.setState(this);
   },
 
   render : function(){
     return(
       <div className="scoreboard">
-        <Header title={this.props.title} />
+        <Header title={this.props.title} players={this.state.players}/>
         <div className="players">
           {this.state.players.map(function(player, index) {
             return (
