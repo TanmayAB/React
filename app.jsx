@@ -16,6 +16,43 @@ var PLAYERS = [
   },
 ];
 
+var nextId = 4;
+
+var AddPlayerForm = React.createClass({
+  
+
+  propTypes : {
+    onAdd : React.PropTypes.func.isRequired,
+  },
+
+  getInitialState : function(){
+    return{
+      name : "",
+    };
+  },
+
+  onNameChange: function(e){
+    console.log("target " + e.target.value);
+    this.setState({name : e.target.value})
+  },
+  onSubmit : function(e){
+    e.preventDefault();
+    this.props.onAdd(this.state.name);
+    this.setState(this.getInitialState())
+  },
+
+  render : function(){
+    return(
+      <div className = "add-player-form">
+        <form onSubmit={this.onSubmit}>
+          <input type="text" value={this.state.name} onChange={this.onNameChange}/>
+          <input type="submit" value="Add Player"/>
+        </form>
+      </div>
+    );
+  }
+}) 
+
 function Stats(props){
   
   var totalPlayers = props.players.length;
@@ -79,6 +116,7 @@ function Player(props) {
   return (
     <div className="player">
       <div className="player-name">
+      <a className="remove-player" onClick={props.onRemove}>x</a>
         {props.name}
       </div>
       <div className="player-score">
@@ -92,6 +130,7 @@ Player.propTypes = {
   name: React.PropTypes.string.isRequired,
   score: React.PropTypes.number.isRequired,
   onScoreChange : React.PropTypes.func.isRequired,
+  onRemove : React.PropTypes.func.isRequired,
 };
   
 var Application = React.createClass({
@@ -123,6 +162,23 @@ var Application = React.createClass({
     this.setState(this);
   },
 
+
+  onPlayerAdd : function(name){
+      this.state.players.push({
+      name : name,
+      score : 0,
+      id : nextId});
+
+      this.setState(this.state);
+
+      nextId += 1;
+  },
+
+  onRemovePlayer : function(index){
+    this.state.players.splice(index,1);
+    this.setState(this.state);
+  },
+
   render : function(){
     return(
       <div className="scoreboard">
@@ -132,6 +188,7 @@ var Application = React.createClass({
             return (
               <Player 
               onScoreChange={function(delta) {this.onScoreChange(index,delta)}.bind(this)}
+              onRemove={function() {this.onRemovePlayer(index)}.bind(this)}
               name={player.name} 
               score={player.score} 
               key={player.id} />
@@ -139,6 +196,7 @@ var Application = React.createClass({
             );
           }.bind(this))}
         </div>
+        <AddPlayerForm onAdd={this.onPlayerAdd}/>
       </div>
     );
   }
